@@ -3,7 +3,14 @@ var http = require("http");
 var fs = require('fs');
 var path = require('path');
 var express = require('express');
-var notesDB = require('./db/db.json');
+// var notesDB = require('./db/db.json');
+
+var data = fs.readFileSync('./db/db.json', "utf8");
+
+var notesDB = JSON.parse(data);
+
+var finalNotesDB = Object.keys(notesDB).map(i => notesDB[i])
+
 // Instantiate a new express app utilizing the express() method.
 var app = express();
 // const notesDB = [];
@@ -27,36 +34,36 @@ app.get("/notes", function(req, res) {
     res.sendFile(path.join(__dirname, "public/notes.html"));
 });
 
-app.get("*", function(req, res) {
-    res.sendFile(path.join(__dirname, "public/index.html"));
-});
 
 // Create API get routes
     //set up the notes
 app.get("/api/notes", function(req, res) {
     //response to access notesDB variable in order to send to response.
-    res.json(db.json);
+    res.json(finalNotesDB);
 });
 
 // Create the API POST routes
 app.post('/api/notes', function(req, res) {
    
   //assigns req.body to a variable
-  const newNote = req.body;
+  // const newNote = req.body;
 
-  notesDB.push(newNote);
+  notesDB.push(req.body);
 
-  fs.writeFile('./db/db.json', JSON.stringify(notesDB, null, 2), (err) => {
+  fs.writeFile('./db/db.json', JSON.stringify(notesDB) + '\n', (err) => {
     if (err){
       console.log('ERROR: Could not add note to database!')
     }
   });
-  res.json(notesDB);
+  res.json(finalNotesDB);
 });
 
 // Create the API delete routes
 
 
+app.get("*", function(req, res) {
+  res.sendFile(path.join(__dirname, "public/index.html"));
+});
 
 
 //Turns our server on
